@@ -38,7 +38,8 @@ export default function HistoryPanel({
 }: HistoryPanelProps) {
   // Lock body scroll when mobile drawer is open
   useEffect(() => {
-    if (isOpen && typeof window !== "undefined" && window.innerWidth < 768) {
+    const isMobile = window.innerWidth < 768;
+    if (isOpen && isMobile) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -49,15 +50,12 @@ export default function HistoryPanel({
   }, [isOpen]);
 
   // ── Desktop sidebar ──────────────────────────────────────────────────
-  // Renders as-is inside the layout (the parent controls visibility via isOpen)
   // ── Mobile: bottom drawer overlay ─────────────────────────────────────
   return (
     <>
-      {/* Desktop sidebar -- hidden on mobile, visible on md+ */}
+      {/* Desktop sidebar -- visible on md+ only when open */}
       <div
-        className={`hidden md:flex w-72 shrink-0 border-l border-border-default bg-panel/80 backdrop-blur-sm flex-col h-full ${
-          isOpen ? "flex" : "hidden"
-        }`}
+        className={`hidden ${isOpen ? "md:flex" : "md:hidden"} w-72 shrink-0 border-l border-border-default bg-panel/80 backdrop-blur-sm flex-col h-full`}
       >
         <InnerPanel
           items={items}

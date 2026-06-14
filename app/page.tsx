@@ -94,11 +94,18 @@ export default function Home() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasResult, setHasResult] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [sessionKey, setSessionKey] = useState(0);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   const handleTranscribe = useCallback(async (file: File, lang: string) => {
     setIsProcessing(true);
     setHasResult(false);
+
+    // Revoke previous audio URL before creating new one
+    setAudioUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return prev;
+    });
 
     // Create audio URL for in-browser playback
     const url = URL.createObjectURL(file);
@@ -160,9 +167,15 @@ export default function Home() {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
     }
+    setSessionKey((k) => k + 1);
   };
 
   const handleHistorySelect = (item: HistoryItem) => {
+    // Revoke any existing audio URL (history items have no audio)
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+    }
     setSegments(item.segments);
     setText(item.text);
     setSrt(item.srt);
@@ -198,7 +211,7 @@ export default function Home() {
                 </div>
 
                 {/* Upload zone */}
-                <UploadZone onTranscribe={handleTranscribe} isProcessing={isProcessing} />
+                <UploadZone key={sessionKey} onTranscribe={handleTranscribe} isProcessing={isProcessing} />
 
                 {/* Quick features */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
