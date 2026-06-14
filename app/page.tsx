@@ -90,6 +90,7 @@ export default function Home() {
   const [language, setLanguage] = useState("");
   const [duration, setDuration] = useState(0);
   const [fileName, setFileName] = useState("");
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasResult, setHasResult] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -98,6 +99,10 @@ export default function Home() {
   const handleTranscribe = useCallback(async (file: File, lang: string) => {
     setIsProcessing(true);
     setHasResult(false);
+
+    // Create audio URL for in-browser playback
+    const url = URL.createObjectURL(file);
+    setAudioUrl(url);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -151,6 +156,10 @@ export default function Home() {
     setText("");
     setSrt("");
     setFileName("");
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+    }
   };
 
   const handleHistorySelect = (item: HistoryItem) => {
@@ -217,6 +226,7 @@ export default function Home() {
                 language={language}
                 duration={duration}
                 fileName={fileName}
+                audioUrl={audioUrl}
                 onReset={handleReset}
               />
             )}

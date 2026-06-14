@@ -1,7 +1,16 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import { Copy, Check, Download, Clock, FileText } from "lucide-react";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import {
+  Play,
+  Pause,
+  Download,
+  Copy,
+  Check,
+  RotateCcw,
+  FileText,
+  AlignLeft,
+} from "lucide-react";
 
 interface Segment {
   start: number;
@@ -9,27 +18,28 @@ interface Segment {
   text: string;
 }
 
-interface TranscriptionResultProps {
+interface Props {
   segments: Segment[];
   text: string;
   srt: string;
   language: string;
   duration: number;
   fileName: string;
+  audioUrl: string | null;
   onReset: () => void;
 }
 
-function formatTS(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
+function fmtTime(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  if (m > 0) return `${m}m ${s}s`;
-  return `${s}s`;
+function fmtTimeMs(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  const ms = Math.floor((sec % 1) * 100);
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}.${String(ms).padStart(2, "0")}`;
 }
 
 export default function TranscriptionResult({
@@ -39,124 +49,272 @@ export default function TranscriptionResult({
   language,
   duration,
   fileName,
+  audioUrl,
   onReset,
-}: TranscriptionResultProps) {
-  const [copied, setCopied] = useState(false);
-  const resultRef = useRef<HTMLDivElement>(null);
+}: Props) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const transcriptRef = useRef<HTMLDivElement | null>(null);
+  const activeRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (resultRef.current) {
-      resultRef.current.scrollIntoView({ behavior: "smooth" });
+  // Playback state
+  const [playing, setPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const [copyState, setCopyState] = useState<"idle" | "txt" | "srt">("idle");
+
+  // Live highlighting
+  const activeSegment = useMemo(() => {
+    if (!playing && currentTime === 0) return -1;
+    return segments.findIndex(
+      (s) => currentTime >= s.start && currentTime < s.end
+    );
+  }, [currentTime, segments, playing]);
+
+  // ── Playback controls ──────────────────────────────────────────────────
+  const togglePlay = useCallback(() => {
+    if (!audioRef.current) return;
+    if (audioRef.current.paused) {
+      audioRef.current.play();
+      setPlaying(true);
+    } else {
+      audioRef.current.pause();
+      setPlaying(false);
     }
   }, []);
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const seekTo = useCallback((time: number) => {
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = time;
+    setCurrentTime(time);
+    if (audioRef.current.paused) {
+      audioRef.current.play().catch(() => {});
+      setPlaying(true);
+    }
+  }, []);
+
+  // Audio element callbacks
+  const onTimeUpdate = useCallback(() => {
+    if (!audioRef.current) return;
+    setCurrentTime(audioRef.current.currentTime);
+  }, []);
+
+  const onPlayEnd = useCallback(() => {
+    setPlaying(false);
+    setCurrentTime(0);
+  }, []);
+
+  const onAudioMeta = useCallback(() => {
+    if (audioRef.current) setAudioDuration(audioRef.current.duration);
+  }, []);
+
+  // Scroll active segment into view
+  useEffect(() => {
+    if (activeRef.current && playing) {
+      activeRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [activeSegment, playing]);
+
+  // ── Progress bar click ─────────────────────────────────────────────────
+  const handleProgressClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!audioRef.current || !audioDuration) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      const time = pct * audioDuration;
+      seekTo(time);
+    },
+    [audioDuration, seekTo]
+  );
+
+  // ── Copy / Download ────────────────────────────────────────────────────
+  const handleCopy = async (format: "txt" | "srt") => {
+    const content = format === "txt" ? text : srt;
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopyState(format);
+      setTimeout(() => setCopyState("idle"), 2000);
+    } catch {}
   };
 
-  const handleDownloadTxt = () => {
-    const blob = new Blob([text], { type: "text/plain" });
+  const handleDownload = (format: "txt" | "srt") => {
+    const content = format === "txt" ? text : srt;
+    const ext = format;
+    const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = fileName.replace(/\.[^/.]+$/, "") + "_transcript.txt";
+    a.download = `${fileName.replace(/\.[^.]+$/, "")}.${ext}`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  const handleDownloadSrt = () => {
-    const blob = new Blob([srt], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName.replace(/\.[^/.]+$/, "") + "_subtitles.srt";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
+  // ── Render ─────────────────────────────────────────────────────────────
   return (
-    <div ref={resultRef} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-      {/* Header bar */}
-      <div className="glass-panel p-4 flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-caption text-text-secondary">
-            <FileText size={14} />
-            <span className="text-text-primary font-medium">{fileName}</span>
-          </div>
-          <span className="text-text-quaternary hidden sm:inline">·</span>
-          <div className="flex items-center gap-2 text-caption text-text-tertiary">
-            <Clock size={14} />
-            <span>{formatDuration(duration)}</span>
-          </div>
-          <span className="text-text-quaternary">·</span>
-          <span className="text-caption text-text-tertiary">{language.toUpperCase()}</span>
-        </div>
+    <div className="w-full space-y-5">
+      {/* Hidden audio element */}
+      {audioUrl && (
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          onTimeUpdate={onTimeUpdate}
+          onLoadedMetadata={onAudioMeta}
+          onEnded={onPlayEnd}
+          preload="auto"
+        />
+      )}
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-caption
-                       text-text-secondary hover:text-text-primary hover:bg-surface transition-colors"
-          >
-            {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
-            {copied ? "Copied" : "Copy"}
-          </button>
-          <button
-            onClick={handleDownloadTxt}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-caption
-                       text-text-secondary hover:text-text-primary hover:bg-surface transition-colors"
-          >
-            <Download size={14} />
-            TXT
-          </button>
-          <button
-            onClick={handleDownloadSrt}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-caption
-                       text-text-secondary hover:text-text-primary hover:bg-surface transition-colors"
-          >
-            <Download size={14} />
-            SRT
-          </button>
-          <div className="h-5 w-px bg-border-default mx-1" />
-          <button
-            onClick={onReset}
-            className="px-3 py-1.5 rounded-md bg-brand text-white text-label hover:bg-brand-hover transition-colors"
-          >
-            New Transcription
-          </button>
+      {/* File info bar */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2 min-w-0">
+          <FileText size={16} className="text-text-tertiary shrink-0" />
+          <span className="text-body-sm text-text-primary truncate">{fileName}</span>
+          <span className="text-caption text-text-quaternary">·</span>
+          <span className="text-caption text-text-tertiary">{fmtTime(duration)}</span>
+          <span className="text-caption text-text-quaternary">·</span>
+          <span className="text-caption text-text-tertiary uppercase">{language}</span>
         </div>
+        <button
+          onClick={onReset}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-caption
+                     text-text-tertiary hover:bg-surface transition-colors shrink-0"
+        >
+          <RotateCcw size={13} />
+          New
+        </button>
       </div>
 
-      {/* Transcript lines */}
-      <div className="glass-panel overflow-hidden">
-        <div className="px-4 py-3 border-b border-border-default">
-          <h3 className="text-caption text-text-tertiary font-[510] uppercase tracking-wider">
-            Transcript
-          </h3>
-        </div>
-        <div className="p-4 space-y-0.5 max-h-[60vh] overflow-y-auto">
-          {segments.map((seg, i) => (
-            <div key={i} className="timestamp-line group flex items-start gap-3 hover:bg-[rgba(255,255,255,0.04)] transition-colors rounded-sm">
-              <span className="text-brand-violet font-mono text-mono-sm shrink-0 mt-0.5 select-none min-w-[3.5rem]">
-                [{formatTS(seg.start)}]
-              </span>
-              <span className="text-text-primary font-mono text-mono leading-relaxed">
-                {seg.text}
-              </span>
+      {/* Audio Player */}
+      {audioUrl && (
+        <div className="glass-panel p-3">
+          <div className="flex items-center gap-3">
+            {/* Play/Pause */}
+            <button
+              onClick={togglePlay}
+              className="w-9 h-9 rounded-full bg-brand hover:bg-brand-hover flex items-center justify-center
+                         transition-colors shrink-0 text-white"
+              aria-label={playing ? "Pause" : "Play"}
+            >
+              {playing ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+            </button>
+
+            {/* Progress bar */}
+            <div
+              className="flex-1 h-2 rounded-full bg-surface cursor-pointer group relative"
+              onClick={handleProgressClick}
+              role="slider"
+              aria-label="Seek"
+              aria-valuemin={0}
+              aria-valuemax={audioDuration}
+              aria-valuenow={currentTime}
+            >
+              <div
+                className="h-full rounded-full bg-brand transition-all duration-100 relative"
+                style={{ width: `${audioDuration ? (currentTime / audioDuration) * 100 : 0}%` }}
+              >
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white
+                                opacity-0 group-hover:opacity-100 transition-opacity shadow-md" />
+              </div>
             </div>
-          ))}
+
+            {/* Time */}
+            <span className="text-mono-sm text-text-tertiary shrink-0 w-24 text-right tabular-nums">
+              {fmtTime(currentTime)} / {fmtTime(audioDuration || duration)}
+            </span>
+          </div>
         </div>
+      )}
+
+      {/* Transcript */}
+      <div
+        ref={transcriptRef}
+        className="glass-panel max-h-[55vh] overflow-y-auto space-y-0.5 p-3 scroll-smooth"
+      >
+        {segments.length === 0 ? (
+          <p className="text-caption text-text-tertiary text-center py-8">
+            No transcript segments available.
+          </p>
+        ) : (
+          segments.map((seg, i) => {
+            const isActive = i === activeSegment;
+            return (
+              <div
+                key={i}
+                ref={isActive ? activeRef : null}
+                onClick={() => seekTo(seg.start)}
+                className={`flex items-start gap-3 px-3 py-2 rounded-md cursor-pointer transition-all duration-200 ${
+                  isActive
+                    ? "bg-brand/10 border-l-2 border-brand"
+                    : "hover:bg-[rgba(255,255,255,0.03)] border-l-2 border-transparent"
+                }`}
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    seekTo(seg.start);
+                  }}
+                  className={`shrink-0 text-mono-sm py-0.5 px-1.5 rounded ${
+                    isActive
+                      ? "text-brand-violet bg-brand/10"
+                      : "text-text-quaternary hover:text-text-secondary hover:bg-surface"
+                  } transition-colors`}
+                  aria-label={`Seek to ${fmtTime(seg.start)}`}
+                >
+                  [{fmtTime(seg.start)}]
+                </button>
+                <span
+                  className={`text-body-sm leading-relaxed ${
+                    isActive ? "text-text-primary" : "text-text-secondary"
+                  }`}
+                >
+                  {seg.text}
+                </span>
+              </div>
+            );
+          })
+        )}
       </div>
 
-      {/* Stats footer */}
-      <div className="flex items-center justify-center gap-6 text-caption text-text-quaternary">
-        <span>{segments.length} segments</span>
-        <span>·</span>
-        <span>{(text.match(/\S+/g) || []).length} words</span>
-        <span>·</span>
-        <span>Model: tiny</span>
+      {/* Action buttons */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Copy TXT */}
+        <button
+          onClick={() => handleCopy("txt")}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-md text-caption
+                     bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+        >
+          {copyState === "txt" ? <Check size={14} /> : <Copy size={14} />}
+          {copyState === "txt" ? "Copied!" : "Copy TXT"}
+        </button>
+
+        {/* Copy SRT */}
+        <button
+          onClick={() => handleCopy("srt")}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-md text-caption
+                     bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+        >
+          {copyState === "srt" ? <Check size={14} /> : <Copy size={14} />}
+          {copyState === "srt" ? "Copied!" : "Copy SRT"}
+        </button>
+
+        {/* Download TXT */}
+        <button
+          onClick={() => handleDownload("txt")}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-md text-caption
+                     bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+        >
+          <Download size={14} />
+          Download TXT
+        </button>
+
+        {/* Download SRT */}
+        <button
+          onClick={() => handleDownload("srt")}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-md text-caption
+                     bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+        >
+          <Download size={14} />
+          Download SRT
+        </button>
       </div>
     </div>
   );
