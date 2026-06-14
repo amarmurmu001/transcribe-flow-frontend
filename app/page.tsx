@@ -181,12 +181,12 @@ export default function Home() {
         {/* ═══════════════════════════════════════════════════════════════
            HERO — Upload / Transcription Area
            ═══════════════════════════════════════════════════════════════ */}
-        <section className="flex-1 flex flex-col items-center justify-center px-4 py-12 lg:py-16">
-          <div className="w-full max-w-3xl mx-auto space-y-8">
+        <section className="flex-1 flex flex-col items-center justify-center px-4 py-10 md:py-12 lg:py-16">
+          <div className="w-full max-w-3xl mx-auto space-y-6 md:space-y-8">
             {!hasResult ? (
               <>
                 {/* Heading */}
-                <div className="text-center space-y-2">
+                <div className="text-center space-y-1.5 md:space-y-2">
                   <h1 className="text-display text-text-primary">
                     Transcribe{" "}
                     <span className="text-gradient">Instantly</span>
@@ -236,7 +236,7 @@ export default function Home() {
         {/* ═══════════════════════════════════════════════════════════════
            FEATURES Section
            ═══════════════════════════════════════════════════════════════ */}
-        <section id="features" className="border-t border-border-default py-16 lg:py-20 px-4">
+        <section id="features" className="border-t border-border-default py-12 md:py-16 lg:py-20 px-4">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
               <span className="inline-block px-3 py-1 rounded-full border border-border-default text-caption text-text-tertiary mb-4">
@@ -273,7 +273,7 @@ export default function Home() {
         {/* ═══════════════════════════════════════════════════════════════
            HOW IT WORKS
            ═══════════════════════════════════════════════════════════════ */}
-        <section id="how-it-works" className="border-t border-border-default py-16 lg:py-20 px-4">
+        <section id="how-it-works" className="border-t border-border-default py-12 md:py-16 lg:py-20 px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <span className="inline-block px-3 py-1 rounded-full border border-border-default text-caption text-text-tertiary mb-4">
@@ -304,7 +304,7 @@ export default function Home() {
         {/* ═══════════════════════════════════════════════════════════════
            SUPPORTED LANGUAGES
            ═══════════════════════════════════════════════════════════════ */}
-        <section className="border-t border-border-default py-12 lg:py-16 px-4">
+        <section className="border-t border-border-default py-10 md:py-12 lg:py-16 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <span className="inline-block px-3 py-1 rounded-full border border-border-default text-caption text-text-tertiary mb-4">
               Languages
@@ -334,7 +334,7 @@ export default function Home() {
         {/* ═══════════════════════════════════════════════════════════════
            FAQ with Schema.org markup
            ═══════════════════════════════════════════════════════════════ */}
-        <section id="faq" className="border-t border-border-default py-16 lg:py-20 px-4">
+        <section id="faq" className="border-t border-border-default py-12 md:py-16 lg:py-20 px-4">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-12">
               <span className="inline-block px-3 py-1 rounded-full border border-border-default text-caption text-text-tertiary mb-4">

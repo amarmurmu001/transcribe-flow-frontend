@@ -47,7 +47,7 @@
   }
 
   .upload-zone {
-    @apply border-2 border-dashed border-border-default rounded-xl p-12
+    @apply border-2 border-dashed border-border-default rounded-xl p-8 md:p-12
            transition-all duration-200 ease-in-out
            bg-[rgba(255,255,255,0.02)];
   }
@@ -59,5 +59,46 @@
   .timestamp-line {
     @apply bg-[rgba(255,255,255,0.02)] rounded-sm px-2.5 py-1.5
            font-mono text-mono leading-relaxed;
+  }
+
+  /* Mobile bottom sheet slide-up */
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  /* Responsive display text */
+  .text-display {
+    font-size: 2rem;
+    line-height: 1.05;
+    letter-spacing: -0.704px;
+    font-weight: 510;
+  }
+
+  @screen sm {
+    .text-display {
+      font-size: 2.5rem;
+      letter-spacing: -0.88px;
+    }
+  }
+
+  @screen lg {
+    .text-display {
+      font-size: 3rem;
+      letter-spacing: -1.056px;
+    }
+  }
+
+  /* Touch-friendly tap targets for mobile */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
   }
 }

@@ -132,13 +132,13 @@ export default function UploadZone({ onTranscribe, isProcessing }: UploadZonePro
       </div>
 
       {selectedFile && !isProcessing && (
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <div className="flex-1">
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
               className="w-full bg-[rgba(255,255,255,0.02)] border border-border-default rounded-md
-                         px-3 py-2 text-caption text-text-secondary
+                         px-3 py-3 sm:py-2 text-caption text-text-secondary
                          focus:outline-none focus:border-brand-violet transition-colors
                          appearance-none cursor-pointer"
             >
@@ -151,13 +151,13 @@ export default function UploadZone({ onTranscribe, isProcessing }: UploadZonePro
           </div>
           <button
             onClick={handleTranscribe}
-            className="px-4 py-2 rounded-md bg-brand text-white text-label hover:bg-brand-hover transition-colors whitespace-nowrap"
+            className="w-full sm:w-auto px-5 py-3 sm:py-2 rounded-md bg-brand text-white text-label hover:bg-brand-hover transition-colors whitespace-nowrap touch-target"
           >
             Transcribe
           </button>
           <button
             onClick={handleReset}
-            className="px-3 py-2 rounded-md text-caption text-text-tertiary hover:text-text-secondary transition-colors"
+            className="w-full sm:w-auto px-4 py-3 sm:py-2 rounded-md text-caption text-text-tertiary hover:text-text-secondary transition-colors touch-target text-center"
           >
             Cancel
           </button>

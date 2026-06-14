@@ -30,7 +30,6 @@ const config: Config = {
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       fontSize: {
-        "display": ["3rem", { lineHeight: "1.00", letterSpacing: "-1.056px", fontWeight: "510" }],
         "h1": ["2rem", { lineHeight: "1.13", letterSpacing: "-0.704px", fontWeight: "510" }],
         "h2": ["1.5rem", { lineHeight: "1.33", letterSpacing: "-0.288px", fontWeight: "510" }],
         "h3": ["1.25rem", { lineHeight: "1.33", letterSpacing: "-0.24px", fontWeight: "590" }],

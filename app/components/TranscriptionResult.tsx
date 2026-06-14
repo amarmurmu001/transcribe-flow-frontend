@@ -175,8 +175,8 @@ export default function TranscriptionResult({
         </div>
         <button
           onClick={onReset}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-caption
-                     text-text-tertiary hover:bg-surface transition-colors shrink-0"
+          className="flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-md text-caption
+                     text-text-tertiary hover:bg-surface transition-colors shrink-0 touch-target"
         >
           <RotateCcw size={13} />
           New
@@ -190,16 +190,16 @@ export default function TranscriptionResult({
             {/* Play/Pause */}
             <button
               onClick={togglePlay}
-              className="w-9 h-9 rounded-full bg-brand hover:bg-brand-hover flex items-center justify-center
-                         transition-colors shrink-0 text-white"
+              className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-brand hover:bg-brand-hover flex items-center justify-center
+                         transition-colors shrink-0 text-white touch-target"
               aria-label={playing ? "Pause" : "Play"}
             >
-              {playing ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+              {playing ? <Pause size={18} className="md:size-4" fill="currentColor" /> : <Play size={18} className="md:size-4" fill="currentColor" />}
             </button>
 
-            {/* Progress bar */}
+            {/* Progress bar — taller on mobile for easier touch */}
             <div
-              className="flex-1 h-2 rounded-full bg-surface cursor-pointer group relative"
+              className="flex-1 h-3 md:h-2 rounded-full bg-surface cursor-pointer group relative"
               onClick={handleProgressClick}
               role="slider"
               aria-label="Seek"
@@ -241,7 +241,7 @@ export default function TranscriptionResult({
                 key={i}
                 ref={isActive ? activeRef : null}
                 onClick={() => seekTo(seg.start)}
-                className={`flex items-start gap-3 px-3 py-2 rounded-md cursor-pointer transition-all duration-200 ${
+                className={`flex items-start gap-3 px-3 py-2.5 md:py-2 rounded-md cursor-pointer transition-all duration-200 min-h-[44px] md:min-h-0 ${
                   isActive
                     ? "bg-brand/10 border-l-2 border-brand"
                     : "hover:bg-[rgba(255,255,255,0.03)] border-l-2 border-transparent"
@@ -252,7 +252,7 @@ export default function TranscriptionResult({
                     e.stopPropagation();
                     seekTo(seg.start);
                   }}
-                  className={`shrink-0 text-mono-sm py-0.5 px-1.5 rounded ${
+                  className={`shrink-0 text-mono-sm py-1 md:py-0.5 px-2 md:px-1.5 rounded min-h-[36px] md:min-h-0 flex items-center ${
                     isActive
                       ? "text-brand-violet bg-brand/10"
                       : "text-text-quaternary hover:text-text-secondary hover:bg-surface"
@@ -275,12 +275,12 @@ export default function TranscriptionResult({
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
         {/* Copy TXT */}
         <button
           onClick={() => handleCopy("txt")}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-md text-caption
-                     bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+          className="flex items-center justify-center gap-1.5 px-3 py-3 sm:py-2 rounded-md text-caption
+                     bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors touch-target"
         >
           {copyState === "txt" ? <Check size={14} /> : <Copy size={14} />}
           {copyState === "txt" ? "Copied!" : "Copy TXT"}
@@ -289,8 +289,8 @@ export default function TranscriptionResult({
         {/* Copy SRT */}
         <button
           onClick={() => handleCopy("srt")}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-md text-caption
-                     bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+          className="flex items-center justify-center gap-1.5 px-3 py-3 sm:py-2 rounded-md text-caption
+                     bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors touch-target"
         >
           {copyState === "srt" ? <Check size={14} /> : <Copy size={14} />}
           {copyState === "srt" ? "Copied!" : "Copy SRT"}
@@ -299,8 +299,8 @@ export default function TranscriptionResult({
         {/* Download TXT */}
         <button
           onClick={() => handleDownload("txt")}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-md text-caption
-                     bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+          className="flex items-center justify-center gap-1.5 px-3 py-3 sm:py-2 rounded-md text-caption
+                     bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors touch-target"
         >
           <Download size={14} />
           Download TXT
@@ -309,8 +309,8 @@ export default function TranscriptionResult({
         {/* Download SRT */}
         <button
           onClick={() => handleDownload("srt")}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-md text-caption
-                     bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+          className="flex items-center justify-center gap-1.5 px-3 py-3 sm:py-2 rounded-md text-caption
+                     bg-surface text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors touch-target"
         >
           <Download size={14} />
           Download SRT
