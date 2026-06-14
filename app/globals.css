@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@layer base {
+  body {
+    @apply bg-page text-text-primary font-sans antialiased;
+    font-feature-settings: 'cv01', 'ss03';
+  }
+
+  ::selection {
+    @apply bg-brand/30 text-text-primary;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-hover rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text-quaternary;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-[rgba(255,255,255,0.02)] border border-border-default rounded-lg;
+  }
+
+  .glass-panel-hover {
+    @apply hover:bg-[rgba(255,255,255,0.04)] transition-colors duration-150;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-violet to-brand bg-clip-text text-transparent;
+  }
+
+  .upload-zone {
+    @apply border-2 border-dashed border-border-default rounded-xl p-12
+           transition-all duration-200 ease-in-out
+           bg-[rgba(255,255,255,0.02)];
+  }
+
+  .upload-zone-active {
+    @apply border-brand bg-[rgba(94,106,210,0.05)];
+  }
+
+  .timestamp-line {
+    @apply bg-[rgba(255,255,255,0.02)] rounded-sm px-2.5 py-1.5
+           font-mono text-mono leading-relaxed;
+  }
+}
