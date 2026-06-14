@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://transcribe-flow-frontend.vercel.app/sitemap.xml

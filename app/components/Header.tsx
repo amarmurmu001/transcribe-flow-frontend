@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, Sparkles, Github } from "lucide-react";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -11,7 +11,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           {/* Logo / Brand */}
-          <a href="/" className="flex items-center gap-2 group">
+          <a href="/" className="flex items-center gap-2 group" aria-label="TranscribeFlow Home">
             <div className="w-7 h-7 rounded-md bg-brand flex items-center justify-center shadow-sm group-hover:bg-brand-hover transition-colors">
               <Sparkles size={14} className="text-white" />
             </div>
@@ -21,24 +21,47 @@ export default function Header() {
           </a>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            <a href="#" className="text-caption text-text-secondary hover:text-text-primary transition-colors">
+          <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
+            <a
+              href="/"
+              className="text-caption text-text-primary transition-colors"
+            >
               Transcribe
             </a>
-            <a href="#" className="text-caption text-text-secondary hover:text-text-primary transition-colors">
-              History
+            <a
+              href="#features"
+              className="text-caption text-text-secondary hover:text-text-primary transition-colors"
+            >
+              Features
             </a>
-            <a href="#" className="text-caption text-text-tertiary hover:text-text-primary transition-colors">
+            <a
+              href="#how-it-works"
+              className="text-caption text-text-secondary hover:text-text-primary transition-colors"
+            >
+              How It Works
+            </a>
+            <a
+              href="#faq"
+              className="text-caption text-text-secondary hover:text-text-primary transition-colors"
+            >
+              FAQ
+            </a>
+            <a
+              href="#api"
+              className="text-caption text-text-tertiary hover:text-text-primary transition-colors"
+            >
               API
             </a>
             <div className="h-5 w-px bg-border-default mx-2" />
             <a
-              href="#"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-brand text-white text-label
-                         hover:bg-brand-hover transition-colors"
+              href="https://github.com/amarmurmu001/transcribe-flow-frontend"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-caption text-text-tertiary hover:text-text-primary hover:bg-surface transition-colors"
+              aria-label="GitHub repository"
             >
-              <Sparkles size={12} />
-              New Transcription
+              <Github size={14} />
+              <span>GitHub</span>
             </a>
           </nav>
 
@@ -46,6 +69,8 @@ export default function Header() {
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="md:hidden p-2 rounded-md text-text-secondary hover:bg-surface transition-colors"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -54,16 +79,27 @@ export default function Header() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border-default bg-panel/95 backdrop-blur-md">
+        <div className="md:hidden border-t border-border-default bg-panel/95 backdrop-blur-md" role="navigation" aria-label="Mobile navigation">
           <div className="px-4 py-3 space-y-2">
-            <a href="#" className="block py-2 text-caption text-text-secondary">Transcribe</a>
-            <a href="#" className="block py-2 text-caption text-text-secondary">History</a>
-            <a href="#" className="block py-2 text-caption text-text-tertiary">API</a>
+            <a href="/" className="block py-2 text-caption text-text-primary">
+              Transcribe
+            </a>
+            <a href="#features" className="block py-2 text-caption text-text-secondary">
+              Features
+            </a>
+            <a href="#how-it-works" className="block py-2 text-caption text-text-secondary">
+              How It Works
+            </a>
+            <a href="#faq" className="block py-2 text-caption text-text-secondary">
+              FAQ
+            </a>
             <a
-              href="#"
-              className="block w-full text-center mt-3 px-3 py-2 rounded-md bg-brand text-white text-label"
+              href="https://github.com/amarmurmu001/transcribe-flow-frontend"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full text-center mt-3 px-3 py-2 rounded-md text-caption text-text-secondary hover:bg-surface transition-colors"
             >
-              New Transcription
+              GitHub
             </a>
           </div>
         </div>
