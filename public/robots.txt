@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://transcribe-flow-frontend.vercel.app/sitemap.xml
+Sitemap: https://transcribe-flow-v1.vercel.app/sitemap.xml
